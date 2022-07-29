@@ -48,11 +48,12 @@ function prepare_json_to_file_flags() {
   if [[ -z "${INPUT_FORMAT}" ]]; then
     # The default format should be provided together with the one we are adding
     FORMATS_FOR_JSON="cli,json"
-  fi
-  if [[ "${INPUT_FORMAT}" == *"json"* ]]; then
-    FORMATS_FOR_JSON="${INPUT_FORMAT}"
   else
-    FORMATS_FOR_JSON="$INPUT_FORMAT,json"
+    if [[ "${INPUT_FORMAT}" == *"json"* ]]; then
+      FORMATS_FOR_JSON="${INPUT_FORMAT}"
+    else
+      FORMATS_FOR_JSON="${INPUT_FORMAT},json"
+    fi
   fi
 
   # Used during the annotation process
@@ -101,8 +102,11 @@ function validate_flags() {
 }
 
 annotate() {
+  if [ "${INPUT_SHOW_ANNOTATIONS}" == "false" ]; then
+    exit "${ORCA_EXIT_CODE}"
+  fi
   mkdir -p "/app/${OUTPUT_FOR_JSON}"
-  cp  "${OUTPUT_FOR_JSON}/iac.json" "/app/${OUTPUT_FOR_JSON}/"
+  cp "${OUTPUT_FOR_JSON}/iac.json" "/app/${OUTPUT_FOR_JSON}/"
   cd /app || exit_with_err "error during annotations initiation"
   npm run build --if-present
   node dist/index.js
